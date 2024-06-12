@@ -29,6 +29,7 @@ const App = () => {
     );
   };
 
+
   const Content = ({ part1, part2, part3 }) => {
     return (
       <>
