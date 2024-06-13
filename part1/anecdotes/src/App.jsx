@@ -13,6 +13,7 @@ const App = () => {
   ];
 
   const [selected, setSelected] = useState(0);
+  const [points, setPoints] = useState({});
 
   const getRandomInt = (max) => {
     return Math.floor(Math.random() * max);
@@ -24,10 +25,24 @@ const App = () => {
     setSelected(picked);
   };
 
+  const handleOnVote = () => {
+    const copy = { ...points };
+
+    if (!(selected in copy)) {
+      copy[selected] = 1;
+    } else {
+      copy[selected] += 1;
+    }
+
+    setPoints(copy);
+  };
+
   return (
     <>
       <div>{anecdotes[selected]}</div>
-      <button onClick={handleOnClick}>Get fun stuff</button>
+      <p>has {points[selected] ? points[selected] : 0} votes</p>
+      <button onClick={handleOnVote}>vote</button>
+      <button onClick={handleOnClick}>next joke</button>
     </>
   );
 };
