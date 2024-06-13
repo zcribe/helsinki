@@ -34,11 +34,12 @@ const App = () => {
     setPoints(copy);
     getMostPopular();
   };
+  
 
   const getMostPopular = () => {
     let values = Object.values(points);
     let max = 0;
-    
+
     for (let i = 0; i < values.length; i++){
       if (points[i] > max){
         max = i;
