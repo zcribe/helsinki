@@ -1,10 +1,16 @@
 import { useEffect, useState } from "react";
 
 import countryService from "./services/countries";
+import weatherService from "./services/weather"
+
+
+import DataView from "./DataView";
+import CountryItem from "./CountryItem";
 
 function App() {
   const [search, setSearch] = useState("");
   const [countries, setCountries] = useState([]);
+  const [weather, setWeather] = useState({})
 
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
@@ -18,24 +24,14 @@ function App() {
 
   if (filteredCountries.length === 1) {
     const country = filteredCountries[0];
-    console.log(country);
-    content = (
-      <>
-        <h1>{country.name.common}</h1>
-        <p>capital {country.capital[0]}</p>
-        <p>area {country.area}</p>
-        <h3>languages:</h3>
-        <ul>
-          {Object.values(country.languages).map((lang)=>(
-            <li>{lang}</li>
-          ))}
-        </ul>
-        <img src={country.flags.png} width="200" height="200" />
-      </>
-    );
+
+    weatherService.get(country.capitalInfo.latlng[0], country.capitalInfo.latlng[1]).then((response )=> setWeather(response))
+
+    content = <DataView country={country} weather={weather}/>;
+    
   } else if (filteredCountries.length < 10) {
     content = filteredCountries.map((country) => (
-      <p key={country.area + country.name.common}>{country.name.common}</p>
+      <CountryItem country={country} setSearch={setSearch} />
     ));
   }
 
