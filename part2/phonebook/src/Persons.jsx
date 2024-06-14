@@ -9,7 +9,7 @@ const Persons = (props) => {
     <>
       {personsToShow.map((person) => (
         <p key={person.name + person.id}>
-          {person.name} {person.number}
+          {person.name} {person.number} <button onClick={() => props.deleteName(person)}>delete</button>
         </p>
       ))}
     </>

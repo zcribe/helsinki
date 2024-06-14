@@ -5,6 +5,8 @@ import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
 
+import personService from "./services/persons";
+
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
@@ -15,16 +17,18 @@ const App = () => {
   const addName = (event) => {
     event.preventDefault();
     const nameObject = {
-      id: persons.length + 1,
+      id: `${persons.length + 1}`,
       name: newName,
       number: newNumber,
     };
 
     let exists = false;
+    let existingId = 0;
 
     for (const person of persons) {
       if (person.name === newName) {
         exists = true;
+        existingId = person.id;
       }
     }
 
@@ -32,8 +36,29 @@ const App = () => {
       setPersons(persons.concat(nameObject));
       setNewName("");
       setNewNumber("");
+      personService.create(nameObject);
     } else {
-      window.alert(`${newName} is already added to phonebook`);
+      if (
+        window.confirm(
+          `${newName} is already added to phonebook, replace the old number with a new one?`
+        )
+      ) {
+        personService
+          .update(existingId, nameObject)
+          .then(() =>
+            personService.getAll().then((response) => setPersons(response))
+          );
+      }
+    }
+  };
+
+  const deleteName = (person) => {
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      personService
+        .remove(person.id)
+        .then(() =>
+          personService.getAll().then((response) => setPersons(response))
+        );
     }
   };
 
@@ -51,9 +76,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((response) => {
-      setPersons(response.data);
-    });
+    personService.getAll().then((response) => setPersons(response));
   }, []);
 
   return (
@@ -74,7 +97,12 @@ const App = () => {
       />
 
       <h2>Numbers</h2>
-      <Persons showAll={showAll} persons={persons} filterTerm={filterTerm} />
+      <Persons
+        showAll={showAll}
+        persons={persons}
+        filterTerm={filterTerm}
+        deleteName={deleteName}
+      />
     </div>
   );
 };
