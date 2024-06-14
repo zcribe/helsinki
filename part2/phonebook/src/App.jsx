@@ -4,6 +4,7 @@ import axios from "axios";
 import Filter from "./Filter";
 import PersonForm from "./PersonForm";
 import Persons from "./Persons";
+import Notification from "./Notification";
 
 import personService from "./services/persons";
 
@@ -13,6 +14,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filterTerm, setFilterTerm] = useState("");
   const [showAll, setShowAll] = useState(true);
+  const [message, setMessage] = useState(null);
+  const [messageType, setMessageType] = useState("success");
 
   const addName = (event) => {
     event.preventDefault();
@@ -32,11 +35,27 @@ const App = () => {
       }
     }
 
+    const createMessage = (message, type) => {
+      setMessageType(type);
+      setMessage(message);
+      setTimeout(() => {
+        setMessage(null);
+        setMessageType("success")
+      }, 5000);
+    };
+
     if (!exists) {
       setPersons(persons.concat(nameObject));
       setNewName("");
       setNewNumber("");
-      personService.create(nameObject);
+      personService
+        .create(nameObject)
+        .then(() => {
+          createMessage(`${nameObject.name} was created!`);
+        })
+        .catch((error) => {
+          createMessage(`Couldn't update ${nameObject.name}`, "error");
+        });
     } else {
       if (
         window.confirm(
@@ -45,9 +64,13 @@ const App = () => {
       ) {
         personService
           .update(existingId, nameObject)
-          .then(() =>
-            personService.getAll().then((response) => setPersons(response))
-          );
+          .then(() => {
+            personService.getAll().then((response) => setPersons(response));
+            createMessage(`Person ${nameObject.name} was updated!`);
+          })
+          .catch((error) => {
+            createMessage(`Couldn't update ${nameObject.name}`, "error");
+          });
       }
     }
   };
@@ -82,6 +105,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} messageType={messageType}/>
       <Filter
         filterTerm={filterTerm}
         handleFilterTermChange={handleFilterTermChange}
